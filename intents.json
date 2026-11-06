@@ -1,0 +1,112 @@
+{
+  "intents": [
+    {
+      "tag": "name",
+      "patterns": [
+        "What is my name?",
+        "What's my name?",
+        "Who am I?",
+        "Do you know my name?",
+        "Tell me what I am called.",
+        "Can you say my name?"
+      ],
+      "responses": [
+        "Your name is Alex Chen."
+      ]
+    },
+    {
+      "tag": "birthday",
+      "patterns": [
+        "When is my birthday?",
+        "When was I born?",
+        "What is my birthday?",
+        "What's my birthday?",
+        "Do you know when my birthday is?",
+        "Tell me my birthday."
+      ],
+      "responses": [
+        "Your birthday is June 15."
+      ]
+    },
+    {
+      "tag": "height",
+      "patterns": [
+        "What is my height?",
+        "How tall am I?",
+        "Tell me my height.",
+        "Do you know how tall I am?",
+        "What is my height in centimeters?",
+        "How tall am I in cm?"
+      ],
+      "responses": [
+        "Your height is 170 cm."
+      ]
+    },
+    {
+      "tag": "weight",
+      "patterns": [
+        "What is my weight?",
+        "How heavy am I?",
+        "Tell me my weight.",
+        "Do you know my weight?",
+        "What do I weigh in kilograms?",
+        "How much do I weigh?"
+      ],
+      "responses": [
+        "Your weight is 60 kg."
+      ]
+    },
+    {
+      "tag": "shoe_size",
+      "patterns": [
+        "What is my shoe size?",
+        "What size shoes do I wear?",
+        "Do you know my shoe size?",
+        "Tell me my shoe size.",
+        "What is my shoe size in Europe?"
+      ],
+      "responses": [
+        "Your shoe size is EU 42."
+      ]
+    },
+    {
+      "tag": "favorite_subject",
+      "patterns": [
+        "What is my favorite subject?",
+        "What's my favorite subject?",
+        "What subject do I like most?",
+        "Tell me my favorite subject.",
+        "Do you know my favorite school subject?"
+      ],
+      "responses": [
+        "Your favorite subject is Mathematics."
+      ]
+    },
+    {
+      "tag": "hobby",
+      "patterns": [
+        "What is my hobby?",
+        "What do I like to do for fun?",
+        "Tell me my hobby.",
+        "What sport do I play?",
+        "What do I enjoy doing in my free time?"
+      ],
+      "responses": [
+        "Your hobby is playing basketball."
+      ]
+    },
+    {
+      "tag": "future_goal",
+      "patterns": [
+        "What is my future goal?",
+        "What do I want to be when I grow up?",
+        "Tell me my career goal.",
+        "What do I want to do in the future?",
+        "What is my dream job?"
+      ],
+      "responses": [
+        "Your future goal is to become a software engineer."
+      ]
+    }
+  ]
+}

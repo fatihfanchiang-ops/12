@@ -1,129 +1,225 @@
-"""
-model.py — the tiny neural network and inference helper.
-
-Architecture (intent classifier, not a full LLM):
-  input  : bag-of-words vector over the vocabulary built from training data
-  hidden : Linear(vocab, hidden_size) -> ReLU -> Dropout
-  output : Linear(hidden_size, num_intents) -> softmax over intents
-
-The answer is looked up from the intent tag. This is the classic
-chatbot / intent-classifier pattern, which is exactly what this project asks for.
-"""
 import json
-import re
-import os
-from pathlib import Path
+import pickle
+import nltk
+import random
+from nltk.stem import WordNetLemmatizer
 
-import torch
-import torch.nn as nn
+nltk.download('punkt', quiet=True)
+nltk.download('wordnet', quiet=True)
 
-BASE_DIR = Path(__file__).resolve().parent
-MODEL_PATH = BASE_DIR / "model.pt"
-INTENTS_PATH = BASE_DIR / "data" / "intents.json"
+lemmatizer = WordNetLemmatizer()
 
-
-class NeuralNet(nn.Module):
-    def __init__(self, input_size, hidden_size, num_classes):
-        super().__init__()
-        self.fc1 = nn.Linear(input_size, hidden_size)
-        self.relu = nn.ReLU()
-        self.dropout = nn.Dropout(0.2)
-        self.fc2 = nn.Linear(hidden_size, num_classes)
-
-    def forward(self, x):
-        out = self.fc1(x)
-        out = self.relu(out)
-        out = self.dropout(out)
-        out = self.fc2(out)
-        return out
-
-
-# ---------- text helpers ----------
-def tokenize(sentence):
-    return re.findall(r"[a-z]+", sentence.lower())
-
-
-def bag_of_words(tokenized_sentence, vocab):
-    """Return a BoW vector aligned with `vocab` (a list of known words)."""
-    word_to_idx = {w: i for i, w in enumerate(vocab)}
-    bow = [0.0] * len(vocab)
-    for w in tokenized_sentence:
-        if w in word_to_idx:
-            bow[word_to_idx[w]] = 1.0
-    return bow
-
-
-# ---------- inference singleton ----------
-_state = None  # (model, vocab, labels, intents, device)
-
-
-def load_model():
-    global _state
-    if _state is not None:
-        return _state
-
-    if not MODEL_PATH.exists():
-        raise FileNotFoundError(
-            f"Trained model not found at {MODEL_PATH}. Run train.py first."
-        )
-
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    checkpoint = torch.load(MODEL_PATH, map_location=device, weights_only=False)
-
-    model = NeuralNet(
-        input_size=checkpoint["input_size"],
-        hidden_size=checkpoint["hidden_size"],
-        num_classes=checkpoint["num_classes"],
-    ).to(device)
-    model.load_state_dict(checkpoint["model_state"])
-    model.eval()
-
-    with open(INTENTS_PATH, "r", encoding="utf-8") as f:
-        intents = json.load(f)
-
-    _state = (
-        model,
-        checkpoint["vocab"],
-        checkpoint["labels"],
-        intents,
-        device,
-    )
-    return _state
-
-
-def predict(message, confidence_threshold=0.5):
-    """Classify `message` and return (intent, confidence, response).
-    If confidence is below the threshold, return a fallback message."""
-    model, vocab, labels, intents, device = load_model()
-
-    tokens = tokenize(message)
-    bow = bag_of_words(tokens, vocab)
-    x = torch.tensor(bow, dtype=torch.float32).reshape(1, -1).to(device)
-
-    with torch.no_grad():
-        logits = model(x)
-        probs = torch.softmax(logits, dim=1)
-        conf, pred_idx = torch.max(probs, dim=1)
-        confidence = conf.item()
-        label = labels[pred_idx.item()]
-
-    if confidence < confidence_threshold:
-        return {
-            "intent": "unknown",
-            "confidence": round(confidence, 4),
-            "response": "Sorry, I don't know that yet. Ask me about my name, birthday, height, weight, shoe size, favorite subject, hobby, or future goal.",
+# 加载你的Fatih数据集
+intents = {
+    "intents": [
+        {
+            "tag": "name",
+            "patterns": [
+                "What is my name?",
+                "Who am I?",
+                "What's my name?",
+                "Can you tell me my name?",
+                "Do you know what I am called?"
+            ],
+            "responses": [
+                "Your name is Fatih."
+            ]
+        },
+        {
+            "tag": "birthday",
+            "patterns": [
+                "When is my birthday?",
+                "When was I born?",
+                "Tell me my birthday.",
+                "What day is my birthday?",
+                "Do you know my date of birth?"
+            ],
+            "responses": [
+                "Your birthday is 11/12."
+            ]
+        },
+        {
+            "tag": "height",
+            "patterns": [
+                "What is my height?",
+                "How tall am I?",
+                "How tall am I in cm?",
+                "Can you tell me how tall I am?",
+                "What is my height in centimeters?"
+            ],
+            "responses": [
+                "Your height is 175 cm."
+            ]
+        },
+        {
+            "tag": "weight",
+            "patterns": [
+                "What is my weight?",
+                "How heavy am I?",
+                "How much do I weigh?",
+                "Tell me my weight.",
+                "What is my weight in kg?"
+            ],
+            "responses": [
+                "Your weight is 60 kg."
+            ]
+        },
+        {
+            "tag": "shoe_size",
+            "patterns": [
+                "What is my shoe size?",
+                "What size shoes do I wear?",
+                "What shoe size am I?",
+                "Tell me my shoe size.",
+                "What EU shoe size do I have?"
+            ],
+            "responses": [
+                "Your shoe size is EU 42."
+            ]
+        },
+        {
+            "tag": "favorite_subject",
+            "patterns": [
+                "What is my favorite subject?",
+                "What subject do I like most?",
+                "Which school subject do I love?",
+                "Tell me my favourite subject.",
+                "What is my best subject?"
+            ],
+            "responses": [
+                "Your favorite subject is Mathematics."
+            ]
+        },
+        {
+            "tag": "hobby",
+            "patterns": [
+                "What is my hobby?",
+                "What sport do I play?",
+                "What do I like to do for fun?",
+                "Tell me my hobby.",
+                "What activity do I enjoy?"
+            ],
+            "responses": [
+                "Your hobby is playing snow skiing."
+            ]
+        },
+        {
+            "tag": "future_goal",
+            "patterns": [
+                "What is my future goal?",
+                "What is my dream job?",
+                "What job do I want in the future?",
+                "Tell me my career goal.",
+                "Where do I want to work later?"
+            ],
+            "responses": [
+                "Your future goal is to work at SpaceX."
+            ]
+        },
+        {
+            "tag": "greeting",
+            "patterns": [
+                "Hello",
+                "Hi",
+                "Hey",
+                "Good morning",
+                "Good afternoon"
+            ],
+            "responses": [
+                "Hello! I am your personal AI. Ask me anything about you."
+            ]
+        },
+        {
+            "tag": "thanks",
+            "patterns": [
+                "Thank you",
+                "Thanks",
+                "Thank you very much"
+            ],
+            "responses": [
+                "You are welcome!"
+            ]
+        },
+        {
+            "tag": "goodbye",
+            "patterns": [
+                "Bye",
+                "Goodbye",
+                "See you"
+            ],
+            "responses": [
+                "Goodbye! Come back to chat again."
+            ]
+        },
+        {
+            "tag": "how_are_you",
+            "patterns": [
+                "How are you?",
+                "How are you doing?"
+            ],
+            "responses": [
+                "I'm an AI, I don't have feelings, but I am ready to help you!"
+            ]
+        },
+        {
+            "tag": "help",
+            "patterns": [
+                "What can you do?",
+                "What can you tell me?",
+                "Help me"
+            ],
+            "responses": [
+                "I know your personal information. You can ask about my name, birthday, height, weight, shoe size, favorite subject, hobby and future goal."
+            ]
         }
+    ]
+}
 
+words = []
+classes = []
+documents = []
+ignore_chars = ["?", ".", ",", "!"]
+
+for intent in intents["intents"]:
+    tag = intent["tag"]
+    for pattern in intent["patterns"]:
+        token_list = nltk.word_tokenize(pattern)
+        token_list = [lemmatizer.lemmatize(w.lower()) for w in token_list if w not in ignore_chars]
+        words.extend(token_list)
+        documents.append((token_list, tag))
+        if tag not in classes:
+            classes.append(tag)
+
+words = sorted(list(set(words)))
+classes = sorted(list(set(classes)))
+
+def bag_of_words(sentence, word_list):
+    tokens = nltk.word_tokenize(sentence)
+    tokens = [lemmatizer.lemmatize(w.lower()) for w in tokens]
+    bag = [0] * len(word_list)
+    for token in tokens:
+        if token in word_list:
+            idx = word_list.index(token)
+            bag[idx] = 1
+    return bag
+
+def predict(user_input):
+    bow = bag_of_words(user_input, words)
+    best_score = 0
+    best_tag = None
+    for token_list, tag in documents:
+        target_bow = bag_of_words(" ".join(token_list), words)
+        score = sum([bow[i] & target_bow[i] for i in range(len(bow))])
+        if score > best_score:
+            best_score = score
+            best_tag = tag
+    if best_tag is None:
+        return {"response":"Sorry, I don't understand that question.", "intent":"unknown"}
     for intent in intents["intents"]:
-        if intent["tag"] == label:
-            return {
-                "intent": label,
-                "confidence": round(confidence, 4),
-                "response": intent["responses"][0],
-            }
+        if intent["tag"] == best_tag:
+            return {"response": random.choice(intent["responses"]), "intent": best_tag}
+    return {"response":"Sorry, I don't understand that question.", "intent":"unknown"}
 
-    return {
-        "intent": "unknown",
-        "confidence": 0.0,
-        "response": "Sorry, I don't understand.",
-    }
+# 保存模型数据
+with open("model_data.pkl", "wb") as f:
+    pickle.dump({"words":words, "classes":classes, "documents":documents, "intents":intents}, f)

@@ -9,7 +9,7 @@ nltk.download('wordnet', quiet=True)
 
 lemmatizer = WordNetLemmatizer()
 
-# 加载你的Fatih数据集
+# 加载Fatih数据集
 intents = {
     "intents": [
         {
@@ -207,18 +207,25 @@ def predict(user_input):
     bow = bag_of_words(user_input, words)
     best_score = 0
     best_tag = None
+    total_words = sum(bow)
     for token_list, tag in documents:
         target_bow = bag_of_words(" ".join(token_list), words)
         score = sum([bow[i] & target_bow[i] for i in range(len(bow))])
         if score > best_score:
             best_score = score
             best_tag = tag
+    # 计算confidence
+    if total_words == 0 or best_score == 0:
+        confidence = 0.0
+    else:
+        confidence = round(best_score / total_words, 2)
+
     if best_tag is None:
-        return {"response":"Sorry, I don't understand that question.", "intent":"unknown"}
+        return {"response":"Sorry, I don't understand that question.", "intent":"unknown", "confidence": confidence}
     for intent in intents["intents"]:
         if intent["tag"] == best_tag:
-            return {"response": random.choice(intent["responses"]), "intent": best_tag}
-    return {"response":"Sorry, I don't understand that question.", "intent":"unknown"}
+            return {"response": random.choice(intent["responses"]), "intent": best_tag, "confidence": confidence}
+    return {"response":"Sorry, I don't understand that question.", "intent":"unknown", "confidence": confidence}
 
 # 保存模型数据
 with open("model_data.pkl", "wb") as f:

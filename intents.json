@@ -1,6 +1,82 @@
 {
   "intents": [
     {
+      "tag": "greeting",
+      "patterns": [
+        "hi",
+        "hello",
+        "hey",
+        "good morning",
+        "good afternoon",
+        "hey there",
+        "hi there",
+        "good evening"
+      ],
+      "responses": [
+        "Hi there! What would you like to know about me today?",
+        "Hello! Ask me anything about myself.",
+        "Hey! I'm ready when you are."
+      ]
+    },
+    {
+      "tag": "thanks",
+      "patterns": [
+        "thank you",
+        "thanks",
+        "thanks a lot",
+        "thank you very much",
+        "appreciate it"
+      ],
+      "responses": [
+        "You're welcome!",
+        "No problem at all!",
+        "Happy to help!"
+      ]
+    },
+    {
+      "tag": "goodbye",
+      "patterns": [
+        "bye",
+        "goodbye",
+        "see you",
+        "see you later",
+        "talk to you later",
+        "good night"
+      ],
+      "responses": [
+        "Goodbye! Have a great day.",
+        "See you later!",
+        "Bye! Come back anytime."
+      ]
+    },
+    {
+      "tag": "how_are_you",
+      "patterns": [
+        "how are you",
+        "how's it going",
+        "what's up",
+        "how are things",
+        "how do you feel"
+      ],
+      "responses": [
+        "I'm doing great, thanks for asking! How about you?",
+        "Pretty good! Ready to answer your questions."
+      ]
+    },
+    {
+      "tag": "help",
+      "patterns": [
+        "what can you do",
+        "what can i ask",
+        "what do you know",
+        "help",
+        "what can you tell me"
+      ],
+      "responses": [
+        "I can tell you my name, birthday, height, weight, shoe size, favorite subject, hobby, and future goal. Give it a try!"
+      ]
+    },
+    {
       "tag": "name",
       "patterns": [
         "What is my name?",
@@ -11,7 +87,9 @@
         "Can you say my name?"
       ],
       "responses": [
-        "Your name is Alex Chen."
+        "Your name is Fatih.",
+        "You're Fatih.",
+        "The name I know is Fatih."
       ]
     },
     {
@@ -25,7 +103,9 @@
         "Tell me my birthday."
       ],
       "responses": [
-        "Your birthday is June 15."
+        "Your birthday is 11/12.",
+        "You were born on 11/12.",
+        "I remember your birthday: 11/12."
       ]
     },
     {
@@ -39,7 +119,9 @@
         "How tall am I in cm?"
       ],
       "responses": [
-        "Your height is 170 cm."
+        "Your height is 175 cm.",
+        "You are 175 cm tall.",
+        "I have you down as 175 cm."
       ]
     },
     {
@@ -53,7 +135,9 @@
         "How much do I weigh?"
       ],
       "responses": [
-        "Your weight is 60 kg."
+        "Your weight is 60 kg.",
+        "You weigh 60 kg.",
+        "I recorded your weight as 60 kg."
       ]
     },
     {
@@ -66,7 +150,9 @@
         "What is my shoe size in Europe?"
       ],
       "responses": [
-        "Your shoe size is EU 42."
+        "Your shoe size is EU 42.",
+        "You wear shoe size EU 42.",
+        "I know your shoes are EU 42."
       ]
     },
     {
@@ -79,7 +165,9 @@
         "Do you know my favorite school subject?"
       ],
       "responses": [
-        "Your favorite subject is Mathematics."
+        "Your favorite subject is Mathematics.",
+        "You like Mathematics the most.",
+        "Mathematics is your favorite subject."
       ]
     },
     {
@@ -92,7 +180,9 @@
         "What do I enjoy doing in my free time?"
       ],
       "responses": [
-        "Your hobby is playing basketball."
+        "Your hobby is snow skiing.",
+        "You enjoy snow skiing in your free time.",
+        "Snow skiing is your hobby."
       ]
     },
     {
@@ -105,7 +195,9 @@
         "What is my dream job?"
       ],
       "responses": [
-        "Your future goal is to become a software engineer."
+        "Your future goal is to work at SpaceX.",
+        "You want to work at SpaceX.",
+        "Your dream job is working at SpaceX."
       ]
     }
   ]
